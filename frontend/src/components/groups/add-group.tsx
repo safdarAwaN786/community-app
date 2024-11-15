@@ -53,7 +53,7 @@ export default function AddGroupRoom({ setIsModal,
 
   useEffect(() => {
     getGroups();
-  }, [allGroups,dispatch]);
+  }, [dispatch]);
 
   const joinGroup = async (index: number) => {
     if (adding === -1) {

@@ -105,8 +105,9 @@ groupNamespace.on("connection", (socket) => {
     // await Room.findByIdAndUpdate(groupId, {
     //   $push: { messages: newMessage._id },
     // });
-
-    groupNamespace.to(groupId).emit("receive-message", newMessage);
+    console.log('message emitting',"groupId",groupId);
+    groupNamespace.to(groupId).emit("receive-group-message", newMessage);
+    console.log('message emiited successfully');
   });
 
   socket.on("disconnect", () => {
