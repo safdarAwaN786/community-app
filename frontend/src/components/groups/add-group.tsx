@@ -33,12 +33,13 @@ export default function AddGroupRoom({ setIsModal,
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [localGroup, setLocalGroup] = useState<any | null>();
-  
+
   const allGroups = useSelector((state: stateType) => state.allGroups);
   const [adding, setAdding] = useState(-1);
   const dispatch = useDispatch();
   const currentUser = useSelector((state: stateType) => state.user.user);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isGroupJoin, setIsGroupJoin] = useState(false)
 
   const getGroups = async () => {
     allGroups?.length > 0 ? setRefreshing(true) : setLoading(true);
@@ -53,7 +54,9 @@ export default function AddGroupRoom({ setIsModal,
 
   useEffect(() => {
     getGroups();
-  }, [dispatch]);
+  }, [dispatch,isGroupJoin]);
+
+  
 
   const joinGroup = async (index: number) => {
     if (adding === -1) {
@@ -71,6 +74,7 @@ export default function AddGroupRoom({ setIsModal,
         suggestGroup: false,
         editGroup: false
       })
+      setIsGroupJoin(prev=>!prev)
       setAdding(-1);
     }
   };
@@ -92,10 +96,18 @@ export default function AddGroupRoom({ setIsModal,
     })
   }
 
-  const filteredGroups = allGroups?.length > 0 ?allGroups?.filter((group: any | undefined) =>
-    group && group?.name.toLowerCase().includes(searchTerm.toLowerCase())) : localGroup?.filter((group: any | undefined) =>
-    group && group?.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredGroups = allGroups?.length > 0
+  ? allGroups?.filter((group: any | undefined) =>
+      group &&
+      (group.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      group.goal.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
+  : localGroup?.filter((group: any | undefined) =>
+      group &&
+      (group.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      group.goal.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
 
   return (
     <>
@@ -103,11 +115,11 @@ export default function AddGroupRoom({ setIsModal,
         <div className="fixed top-0 left-0 w-screen h-screen backdrop-blur flex justify-center items-center pt-10">
           <div className="h-[85%] w-[500px] overflow-y-scroll max-w-md p-4 bg-white border border-gray-200 rounded-lg shadow sm:p-8 dark:bg-gray-800 dark:border-gray-700">
             <div className="flex items-center justify-between mb-4">
-              <button onClick={handleCreateGroup} className="flex items-center gap-2 text-blue-600 hover:text-blue-800">
+              <button onClick={handleCreateGroup} className="flex items-center border p-3 rounded-md hover:bg-white gap-2 text-blue-600 hover:text-blue-800">
                 <PlusCircle size={20} />
                 Create Group
               </button>
-              <button onClick={handleSuggestedGroup} className="flex items-center gap-2 text-blue-600 hover:text-blue-800">
+              <button onClick={handleSuggestedGroup} className="flex items-center border p-3 rounded-md hover:bg-white gap-2 text-blue-600 hover:text-blue-800">
                 <Sparkle size={20} />
                 Suggested Group
               </button>
@@ -147,9 +159,9 @@ export default function AddGroupRoom({ setIsModal,
                       <li className="py-3 sm:py-4" key={userObj._id}>
                         <div className="flex items-center">
                           <div className="flex-shrink-0">
-                            <Image
+                            <img
                               className="w-10 h-10 rounded-full"
-                              src={userSvg}
+                              src={userObj.imageUrl || userSvg}
                               alt="User"
                             />
                           </div>
@@ -157,6 +169,7 @@ export default function AddGroupRoom({ setIsModal,
                             <p className="text-sm font-medium text-gray-900 truncate dark:text-white">
                               {userObj?.name}
                             </p>
+                            <p className="text-xs font-medium text-gray-900 truncate dark:text-gray-400">{userObj.goal}</p>
                             <p className="text-sm text-gray-500 truncate dark:text-gray-400">
                               {userObj?.email}
                             </p>

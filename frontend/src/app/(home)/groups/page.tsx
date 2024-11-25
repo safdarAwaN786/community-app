@@ -17,6 +17,7 @@ import backArrow from "../../../../public/svgs/back-arrow.svg";
 import sendIcon from "../../../../public/svgs/send.svg";
 import searchSvg from "./../../../../public/svgs/search.svg";
 import EditGroup from "@/components/groups/edit-group";
+import MobileGroupList from "@/components/groups/mobile-group-list";
 
 // Define type for the modal state
 export interface ModalState {
@@ -40,7 +41,7 @@ export default function Groups() {
     addGroup: false,
     createGroup: false,
     suggestGroup: false,
-    editGroup:false
+    editGroup: false
   });
 
   const chatBoxRef = useRef<HTMLDivElement | null>(null);
@@ -114,7 +115,7 @@ export default function Groups() {
     }
   };
 
-  const handleEditModal = () =>{
+  const handleEditModal = () => {
     setIsModal({
       addGroup: false,
       createGroup: false,
@@ -127,7 +128,7 @@ export default function Groups() {
     <>
       <div className=" lg:w-[25%] h-[80%] lg:h-screen w-full border-r-2 border-[#F5F6F7]">
         {/* Messages Number Box */}
-        {JSON.stringify(currentGroup) === JSON.stringify({}) ? (
+        {currentGroup && JSON.stringify(currentGroup) === JSON.stringify({}) ? (
           <>
             {/* Search Box */}
             <div className=" px-8 lg:hidden w-full py-2 lg:h-[10%] h-[10%]">
@@ -144,11 +145,11 @@ export default function Groups() {
                 />
               </div>
             </div>
-            <MobileRoomsList />
+            <MobileGroupList />
           </>
         ) : (
           <div className="w-full h-full block lg:hidden">
-            {JSON.stringify(currentGroup) !== JSON.stringify({}) && (
+            {currentGroup && JSON.stringify(currentGroup) !== JSON.stringify({}) && (
               <>
                 <div className="flex flex-row pt-2 justify-start lg:h-[12%] h-[10%] border-b-2 border-[#F5F6F7] gap-4 items-start px-5">
                   <div className=" flex flex-row items-start cursor-pointer">
@@ -158,15 +159,15 @@ export default function Groups() {
                       className="w-8"
                       onClick={() => {
                         dispatch(selectGroup({
-                          admin: ""
+                          admin :""
                         }));
                       }}
                     />
                     <img
-                        src={typeof currentGroup?.imageUrl === 'string' ? currentGroup.imageUrl : chatPerson.src}
-                        className="w-12 rounded-lg h-12 object-cover"
-                        alt="person"
-                      />
+                      src={typeof currentGroup?.imageUrl === 'string' ? currentGroup.imageUrl : chatPerson.src}
+                      className="w-12 rounded-lg h-12 object-cover"
+                      alt="person"
+                    />
                   </div>
                   <div className="flex flex-col">
                     <p className=" font-semibold text-xl mt-[0.5]">
@@ -192,7 +193,7 @@ export default function Groups() {
 
                     return (
                       <>
-                        {message.sender === currentUser?._id ? (
+                        {currentGroup && message.sender === currentUser?._id ? (
                           <>
                             {messages[index - 1]?.sender ===
                               currentUser?._id ? (
@@ -215,11 +216,12 @@ export default function Groups() {
                             )}
                           </>
                         ) : (
+
                           <>
-                            {messages[index - 1]?.sender ===
+                            {currentGroup && currentUser && messages[index - 1]?.sender ===
                               currentGroup?.members?.find(
                                 (member: userType) =>
-                                  member._id !== currentUser._id
+                                  member?._id !== currentUser?._id
                               )?._id ? (
                               <div className="w-full flex flex-row gap-4">
                                 <div className="px-4 max-w-[70%] ms-16 mb-2 radius-without-left-top py-2 bg-[#F5F6F7] text-[#333333]">
@@ -304,7 +306,8 @@ export default function Groups() {
       </div>
 
       <div className="w-[70%] hidden lg:flex flex-col items-start">
-        {JSON.stringify(currentGroup) !== JSON.stringify({}) ? (
+        {currentGroup && JSON.stringify(currentGroup) !== JSON.stringify({}) ? (
+
           <>
             <div className="flex flex-row justify-start cursor-pointer h-[12%] border-b-2 border-[#F5F6F7] gap-4 items-center px-5" onClick={handleEditModal}>
               <div className="">
@@ -328,7 +331,7 @@ export default function Groups() {
               {messages?.map((message, index) => {
                 return (
                   <>
-                    {message.sender === currentUser?._id ? (
+                    {currentGroup && currentUser && message.sender === currentUser?._id ? (
                       <>
                         {messages[index - 1]?.sender === currentUser?._id ? (
                           <div className=" w-full flex flex-row-reverse gap-4 items-start">
@@ -351,7 +354,7 @@ export default function Groups() {
                       </>
                     ) : (
                       <>
-                        {messages[index - 1]?.sender ===
+                        {currentGroup && currentUser && messages[index - 1]?.sender ===
                           currentGroup?.members?.find(
                             (member: userType) =>
                               member._id !== currentUser._id

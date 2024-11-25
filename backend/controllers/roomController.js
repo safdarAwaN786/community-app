@@ -108,45 +108,58 @@ module.exports.getPersonalRooms = async (req, res) => {
 module.exports.createGroup = async (req, res) => {
   try {
     const { name, members, goal } = req.body;
+    console.log("Incoming members:", members);
+
     const currentUserId = await getIdFromToken(req.header("Authorization"));
 
-    console.log('Hello');
     if (!name) {
       return res.status(400).json({ message: "Group name is required" });
     }
 
-    // Check if an image is provided in the request
-    let imageUrl = null;
-    if (req.file) {
-      // Upload file to Cloudinary using buffer
-      const result = await new Promise((resolve, reject) => {
-        const upload = v2?.uploader?.upload_stream((error, result) => {
-        if (error) return reject(error);
-        console.log(result)
-        resolve(result);
-      });
-      upload?.end(req?.file?.buffer);
-      });
-      imageUrl = result.secure_url;
-      console.log(imageUrl,"upload");
+    // Validate and parse members
+    const parsedMembers = typeof members === "string" ? JSON.parse(members) : members;
+    const isValidMembers = Array.isArray(parsedMembers) && parsedMembers.every(member => mongoose.Types.ObjectId.isValid(member));
+
+    if (!isValidMembers) {
+      return res.status(400).json({ message: "Invalid member IDs" });
     }
 
-    const newGroup = new roomModel({
+    // Add current user to members if not already included
+    if (!parsedMembers.includes(currentUserId)) {
+      parsedMembers.push(currentUserId);
+    }
+
+    // Upload image if provided
+    let imageUrl = null;
+    if (req.file) {
+      const result = await new Promise((resolve, reject) => {
+        const upload = v2?.uploader?.upload_stream((error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        });
+        upload?.end(req?.file?.buffer);
+      });
+      imageUrl = result.secure_url;
+    }
+
+    // Create and save the group
+    const newGroup = await roomModel.create({
       type: "group",
       name,
       goal,
-      members: [...members, currentUserId],
+      members: parsedMembers,
       admin: currentUserId,
-      imageUrl:imageUrl
+      imageUrl,
     });
 
-    await newGroup.save();
     res.status(200).json({ group: newGroup });
   } catch (error) {
     console.error("Error creating group:", error);
     res.status(400).json({ message: "Failed to create group" });
   }
 };
+
+
 
 
 module.exports.getAllMessagesForGroup = async (req, res) => {

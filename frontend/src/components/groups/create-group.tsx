@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux"
 import Cookies from "js-cookie"
 import { ChevronLeft, PlusCircle, X } from "lucide-react"
 import { getAllUsers } from "@/API/users"
-import { createGroupAPI, createRoomAPI, getAllGroups } from "@/API/rooms"
+import { createGroupAPI, createRoomAPI, getAllGroups, getGroupRooms } from "@/API/rooms"
 import { setAllUsers } from "@/redux/slices/allUsers"
 import { stateType } from "@/types/stateTypes"
 import { userType } from "@/types/basicTypes"
@@ -55,18 +55,18 @@ export default function CreateGroup({ setIsModal, isModal }: groupRoomT) {
     e.preventDefault();
     setLoading(true);
     try {
-        const formData = new FormData(); // Create a FormData instance
+        const formData = new FormData();
         formData.append("name", groupName);
         formData.append("goal", groupGoals);
-        formData.append("members", JSON.stringify(selectedUsers)); // If your server expects this as a JSON string
+        formData.append("members", JSON.stringify(selectedUsers)); 
         formData.append("type", "group");
         
         if (groupPicture) {
-            formData.append("imageURL", groupPicture); // Append the image file
+            formData.append("imageURL", groupPicture); 
         }
 
         const result = await createGroupAPI(Cookies.get("userToken"), formData);
-        const newGroups = await getAllGroups(Cookies.get("userToken"));
+        const newGroups = await getGroupRooms(Cookies.get("userToken"));
         dispatch(updateGroups(newGroups));
         setIsModal({
             addGroup: false,
@@ -88,11 +88,11 @@ export default function CreateGroup({ setIsModal, isModal }: groupRoomT) {
     if (file) {
       const reader = new FileReader()
       reader.onloadend = () => {
-        setGroupPicturePreview(reader.result as string) // Set the preview URL
+        setGroupPicturePreview(reader.result as string) 
       }
       reader.readAsDataURL(file)
     } else {
-      setGroupPicturePreview(null) // Clear the preview if no file is selected
+      setGroupPicturePreview(null)
     }
   }
 

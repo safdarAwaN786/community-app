@@ -36,8 +36,6 @@ const GroupList = ({ isModal, setIsModal }: groupRoomT) => {
   };
 
   useEffect(() => {
-    // console.log(currentGroup?.admin?.toString() == currentUser?._id,currentUser?._id,currentGroup?.admin);
-    
     fetchGroups();
   }, [dispatch]);
 

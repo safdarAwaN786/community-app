@@ -93,7 +93,7 @@ export default function Home() {
     <>
       <div className=" lg:w-[25%] h-[80%] lg:h-screen w-full border-r-2 border-[#F5F6F7]">
         {/* Messages Number Box */}
-        {JSON.stringify(currentRoom) === JSON.stringify({}) ? (
+        {currentRoom && JSON.stringify(currentRoom) === JSON.stringify({}) ? (
           <>
             {/* Search Box */}
             <div className=" px-8 lg:hidden w-full py-2 lg:h-[10%] h-[10%]">
@@ -114,7 +114,7 @@ export default function Home() {
           </>
         ) : (
           <div className="w-full h-full block lg:hidden">
-            {JSON.stringify(currentRoom) !== JSON.stringify({}) && (
+            {currentRoom && JSON.stringify(currentRoom) !== JSON.stringify({}) && (
               <>
                 <div className="flex flex-row pt-2 justify-start lg:h-[12%] h-[10%] border-b-2 border-[#F5F6F7] gap-4 items-start px-5">
                   <div className=" flex flex-row items-start cursor-pointer">
@@ -156,9 +156,9 @@ export default function Home() {
                     
                     return (
                       <>
-                        {message.sender === currentUser?._id ? (
+                        {currentRoom && currentUser && message.sender === currentUser?._id ? (
                           <>
-                            {messages[index - 1]?.sender ===
+                            {currentRoom && currentUser && messages[index - 1]?.sender ===
                             currentUser?._id ? (
                               <div className=" w-full flex flex-row-reverse gap-4 items-start">
                                 <div className="px-4 max-w-[70%] radius-without-right-top me-16 mb-2 py-2 bg-[#615EF0] text-[#FFFFFF]">
@@ -180,7 +180,7 @@ export default function Home() {
                           </>
                         ) : (
                           <>
-                            {messages[index - 1]?.sender ===
+                            {currentRoom && currentUser && messages[index - 1]?.sender ===
                             currentRoom?.members?.find(
                               (member: userType) =>
                                 member._id !== currentUser._id
@@ -265,7 +265,7 @@ export default function Home() {
       </div>
 
       <div className="w-[70%] hidden lg:flex flex-col items-start">
-        {JSON.stringify(currentRoom) !== JSON.stringify({}) ? (
+        {currentRoom && currentUser && JSON.stringify(currentRoom) !== JSON.stringify({}) ? (
           <>
             <div className="flex flex-row justify-start h-[12%] border-b-2 border-[#F5F6F7] gap-4 items-center px-5">
               <div className="">
@@ -277,7 +277,7 @@ export default function Home() {
               </div>
               <div className="flex flex-col">
                 <p className=" font-semibold text-xl mt-[0.5]">
-                  {currentRoom?.type === "group"
+                  {currentRoom && currentUser && currentRoom?.type === "group"
                     ? currentRoom?.name
                     : currentRoom?.members?.find(
                         (member: userType) => member._id !== currentUser._id
@@ -292,7 +292,7 @@ export default function Home() {
               </div>
             </div>
             <div className=" w-full flex flex-col h-[75%] overflow-y-scroll gap-1 p-6">
-              {messages?.map((message, index) => {
+              {currentRoom && currentUser && messages?.map((message, index) => {
                 return (
                   <>
                     {message.sender === currentUser?._id ? (
@@ -318,7 +318,7 @@ export default function Home() {
                       </>
                     ) : (
                       <>
-                         {messages[index - 1]?.sender ===
+                         {currentRoom && currentUser && messages[index - 1]?.sender ===
                             currentRoom?.members?.find(
                               (member: userType) =>
                                 member._id !== currentUser._id
