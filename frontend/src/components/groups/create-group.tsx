@@ -16,7 +16,7 @@ import closeSvg from "../../../public/svgs/cross.svg"
 import userSvg from "../../../public/svgs/user.svg"
 import { groupRoomT } from "./add-group"
 import { button } from "@material-tailwind/react"
-import { updateGroups } from "@/redux/slices/groupRoomSlice"
+import { updateAllGroups, updateGroups } from "@/redux/slices/groupRoomSlice"
 
 export default function CreateGroup({ setIsModal, isModal }: groupRoomT) {
   const router = useRouter()
@@ -55,31 +55,33 @@ export default function CreateGroup({ setIsModal, isModal }: groupRoomT) {
     e.preventDefault();
     setLoading(true);
     try {
-        const formData = new FormData();
-        formData.append("name", groupName);
-        formData.append("goal", groupGoals);
-        formData.append("members", JSON.stringify(selectedUsers)); 
-        formData.append("type", "group");
-        
-        if (groupPicture) {
-            formData.append("imageURL", groupPicture); 
-        }
+      const formData = new FormData();
+      formData.append("name", groupName);
+      formData.append("goal", groupGoals);
+      formData.append("members", JSON.stringify(selectedUsers));
+      formData.append("type", "group");
 
-        const result = await createGroupAPI(Cookies.get("userToken"), formData);
-        const newGroups = await getGroupRooms(Cookies.get("userToken"));
-        dispatch(updateGroups(newGroups));
-        setIsModal({
-            addGroup: false,
-            createGroup: false,
-            suggestGroup: false
-        });
+      if (groupPicture) {
+        formData.append("imageURL", groupPicture);
+      }
+
+      const result = await createGroupAPI(Cookies.get("userToken"), formData);
+      const newGroups = await getGroupRooms(Cookies.get("userToken"));
+      const allGroups = await getAllGroups(Cookies.get("userToken"));
+      dispatch(updateGroups(newGroups));
+      dispatch(updateAllGroups(allGroups))
+      setIsModal({
+        addGroup: false,
+        createGroup: false,
+        suggestGroup: false
+      });
     } catch (error) {
-        console.error("Error creating group:", error);
+      console.error("Error creating group:", error);
     }
     setLoading(false);
-};
+  };
 
-  
+
 
   // Update image preview when a new file is selected
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,7 +90,7 @@ export default function CreateGroup({ setIsModal, isModal }: groupRoomT) {
     if (file) {
       const reader = new FileReader()
       reader.onloadend = () => {
-        setGroupPicturePreview(reader.result as string) 
+        setGroupPicturePreview(reader.result as string)
       }
       reader.readAsDataURL(file)
     } else {
