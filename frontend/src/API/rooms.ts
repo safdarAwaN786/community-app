@@ -50,7 +50,7 @@ export const getGroupRooms = async (userToken: string | undefined) => {
 };
 
 export const joinGroupAPI = async (userToken: string | undefined, groupId: string | undefined) => {
-  console.log("getting all groups");
+  console.log(userToken,groupId,"join group data");
   const data = { groupId: groupId }
   const result = await axios
     .post(backendUrl + "/join-group", data, {

@@ -117,8 +117,11 @@ module.exports.createGroup = async (req, res) => {
     }
 
     // Validate and parse members
-    const parsedMembers = typeof members === "string" ? JSON.parse(members) : members;
-    const isValidMembers = Array.isArray(parsedMembers) && parsedMembers.every(member => mongoose.Types.ObjectId.isValid(member));
+    const parsedMembers =
+      typeof members === "string" ? JSON.parse(members) : members;
+    const isValidMembers =
+      Array.isArray(parsedMembers) &&
+      parsedMembers.every((member) => mongoose.Types.ObjectId.isValid(member));
 
     if (!isValidMembers) {
       return res.status(400).json({ message: "Invalid member IDs" });
@@ -158,9 +161,6 @@ module.exports.createGroup = async (req, res) => {
     res.status(400).json({ message: "Failed to create group" });
   }
 };
-
-
-
 
 module.exports.getAllMessagesForGroup = async (req, res) => {
   try {
@@ -221,32 +221,58 @@ module.exports.getJoinedGroups = async (req, res) => {
 
 module.exports.joinGroup = async (req, res) => {
   try {
-    const currentUserId = await getIdFromToken(req.header("Authorization"));
+    const authHeader = req.header("Authorization");
+    if (!authHeader) {
+      return res.status(401).json({ message: "Authorization header is missing" });
+    }
+
+    const currentUserId = await getIdFromToken(authHeader);
+    console.log("Current User ID:", currentUserId);
+
+    if (!currentUserId) {
+      return res.status(400).json({ message: "Invalid token or user ID not found" });
+    }
+
     const { groupId } = req.body;
+    console.log("Group ID:", groupId);
+
+    if (!groupId) {
+      return res.status(400).json({ message: "Group ID is missing" });
+    }
 
     // Check if the group exists
     const group = await roomModel.findById(groupId);
     if (!group) {
       return res.status(404).json({ message: "Group does not exist" });
     }
-
+    console.log('Group members:',group.members);
     // Check if the user is already a member
     if (group.members.includes(currentUserId)) {
-      return res
-        .status(400)
-        .json({ message: "You have already joined this group" });
+      return res.status(400).json({ message: "You have already joined this group" });
     }
 
-    // Add the user to the group if not already a member
-    await roomModel.findByIdAndUpdate(groupId, {
-      $addToSet: { members: currentUserId },
-    });
-    res.status(200).json({ message: "Successfully joined the group" });
+    // Debugging the update query
+    console.log("Attempting to add user to group...");
+    const updatedGroup = await roomModel.findByIdAndUpdate(
+      groupId,
+      { $addToSet: { members: currentUserId } },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedGroup) {
+      console.error("Failed to update group members.");
+      return res.status(500).json({ message: "Failed to update group members" });
+    }
+
+    console.log("Updated Group:", updatedGroup);
+
+    res.status(200).json({ message: "Successfully joined the group", group: updatedGroup });
   } catch (error) {
-    console.error("Error joining group:", error);
-    res.status(400).json({ message: "Failed to join group" });
+    console.error("Error joining group:", error.message || error);
+    res.status(500).json({ message: "Failed to join group" });
   }
 };
+
 
 module.exports.getSuggestedGroups = async (req, res) => {
   try {
@@ -292,7 +318,6 @@ module.exports.getSuggestedGroups = async (req, res) => {
   }
 };
 
-
 module.exports.editGroup = async (req, res) => {
   try {
     const { groupId } = req.params;
@@ -307,7 +332,9 @@ module.exports.editGroup = async (req, res) => {
 
     // Check if the current user is the admin of the group
     if (group.admin.toString() !== currentUserId.toString()) {
-      return res.status(403).json({ message: "Only the admin can edit the group" });
+      return res
+        .status(403)
+        .json({ message: "Only the admin can edit the group" });
     }
 
     const updateFields = {
@@ -317,7 +344,7 @@ module.exports.editGroup = async (req, res) => {
 
     if (req.file) {
       if (group.imageUrl) {
-        const publicId = group.imageUrl.split('/').pop().split('.')[0];
+        const publicId = group.imageUrl.split("/").pop().split(".")[0];
         await v2?.uploader?.destroy(publicId);
       }
 
@@ -348,12 +375,18 @@ module.exports.editGroup = async (req, res) => {
     }
 
     // Convert parsedMembers to ObjectId array with `new` keyword
-    const memberIds = parsedMembers.map(member => new mongoose.Types.ObjectId(member));
+    const memberIds = parsedMembers.map(
+      (member) => new mongoose.Types.ObjectId(member)
+    );
 
     if (memberIds.length) {
-      const currentMembers = group.members.map(member => member.toString());
-      const newMembers = memberIds.filter(member => !currentMembers.includes(member.toString()));
-      const membersToRemove = currentMembers.filter(member => !memberIds.map(id => id.toString()).includes(member));
+      const currentMembers = group.members.map((member) => member.toString());
+      const newMembers = memberIds.filter(
+        (member) => !currentMembers.includes(member.toString())
+      );
+      const membersToRemove = currentMembers.filter(
+        (member) => !memberIds.map((id) => id.toString()).includes(member)
+      );
 
       if (newMembers.length > 0) {
         await roomModel.findByIdAndUpdate(
@@ -378,7 +411,6 @@ module.exports.editGroup = async (req, res) => {
     res.status(400).json({ message: "Failed to edit group" });
   }
 };
-
 
 module.exports.getGroupById = async (req, res) => {
   try {

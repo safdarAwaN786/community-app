@@ -101,7 +101,7 @@ export default function AddPersonalRoom() {
                 >
                   {users?.map((userObj: userType, index: number) => {
                     return (
-                      <li className="py-3 sm:py-4">
+                      <li className="py-3 sm:py-4" key={index}>
                         <div className="flex items-center">
                           <div className="flex-shrink-0">
                             <Image
