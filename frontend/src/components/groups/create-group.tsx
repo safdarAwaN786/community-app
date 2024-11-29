@@ -1,21 +1,21 @@
 'use client'
 
-import { useState, useEffect } from "react"
-import Image from "next/image"
-import { useRouter } from "next/navigation"
-import { useDispatch, useSelector } from "react-redux"
+import { createGroupAPI, getAllGroups, getGroupRooms } from "@/API/rooms"
+import { getAllUsers } from "@/API/users"
+import { setAllUsers } from "@/redux/slices/allUsers"
+import { userType } from "@/types/basicTypes"
+import { stateType } from "@/types/stateTypes"
 import Cookies from "js-cookie"
 import { ChevronLeft, PlusCircle, X } from "lucide-react"
-import { getAllUsers } from "@/API/users"
-import { createGroupAPI, getAllGroups, getGroupRooms } from "@/API/rooms"
-import { setAllUsers } from "@/redux/slices/allUsers"
-import { stateType } from "@/types/stateTypes"
-import { userType } from "@/types/basicTypes"
+import Image from "next/image"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { useDispatch, useSelector } from "react-redux"
 
+import { updateAllGroups, updateGroups } from "@/redux/slices/groupRoomSlice"
 import closeSvg from "../../../public/svgs/cross.svg"
 import userSvg from "../../../public/svgs/user.svg"
 import { groupRoomT } from "./add-group"
-import { updateAllGroups, updateGroups } from "@/redux/slices/groupRoomSlice"
 
 export default function CreateGroup({ setIsModal, isModal }: groupRoomT) {
   const router = useRouter()
@@ -39,8 +39,8 @@ export default function CreateGroup({ setIsModal, isModal }: groupRoomT) {
     fetchUsers()
   }, [dispatch])
 
-  const filteredUsers = allUsers
-    .filter((user: userType) => user._id !== currentUser._id) // Exclude current user
+  const filteredUsers = currentUser && allUsers
+    .filter((user: userType) => user._id !== currentUser?._id) // Exclude current user
     .filter((user: userType) =>
       user && user?.name?.toLowerCase().includes(searchTerm.toLowerCase())
     )
@@ -218,7 +218,7 @@ export default function CreateGroup({ setIsModal, isModal }: groupRoomT) {
             />
           </div>
           <div className="max-h-[15rem] scroll-px-3 overflow-y-auto">
-            {filteredUsers.map((user: userType) => (
+            {filteredUsers && filteredUsers?.map((user: userType) => (
               <div
                 key={user._id}
                 className="flex items-center justify-between py-2"

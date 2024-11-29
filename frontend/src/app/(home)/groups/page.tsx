@@ -90,6 +90,7 @@ export default function Groups() {
   }, [userToken, allRooms, dispatch, isMessageSent]);
 
   useEffect(() => {
+    
     if (socket && currentGroup._id) {
       console.log(`Joining group: ${currentGroup._id}`)
       socket.emit('join-group', currentGroup._id)
@@ -128,7 +129,7 @@ export default function Groups() {
     <>
       <div className=" lg:w-[25%] h-[80%] lg:h-screen w-full border-r-2 border-[#F5F6F7]">
         {/* Messages Number Box */}
-        {currentGroup && JSON.stringify(currentGroup) === JSON.stringify({}) ? (
+        {currentGroup && JSON.stringify(currentGroup) === JSON.stringify({admin:""}) ? (
           <>
             {/* Search Box */}
             <div className=" px-8 lg:hidden w-full py-2 lg:h-[10%] h-[10%]">
@@ -145,13 +146,13 @@ export default function Groups() {
                 />
               </div>
             </div>
-            <MobileGroupList />
+            <MobileGroupList isModal={isModal} setIsModal={setIsModal} />
           </>
         ) : (
           <div className="w-full h-full block lg:hidden">
-            {currentGroup && JSON.stringify(currentGroup) !== JSON.stringify({}) && (
+            {currentGroup && JSON.stringify(currentGroup) !== JSON.stringify({admin:""}) && (
               <>
-                <div className="flex flex-row pt-2 justify-start lg:h-[12%] h-[10%] border-b-2 border-[#F5F6F7] gap-4 items-start px-5">
+                <div className="flex flex-row pt-2 justify-start lg:h-[12%] border-b-2 border-[#F5F6F7] gap-4 items-start px-5">
                   <div className=" flex flex-row items-start cursor-pointer">
                     <Image
                       src={backArrow}
@@ -177,12 +178,6 @@ export default function Groups() {
                           (member: userType) => member._id !== currentUser._id
                         )?.name}
                     </p>
-                    {/* <div className=" flex flex-row gap-2 justify-start">
-                      <Image src={online} alt="anline" />
-                      <span className=" text-[#333333] font-semibold text-sm">
-                        Online
-                      </span>
-                    </div> */}
                   </div>
                 </div>
                 <div
@@ -296,7 +291,7 @@ export default function Groups() {
           <div className=" bg-[#F5F6F7] flex flex-row gap-3 w-full text-xl h-full px-5 rounded-md">
             <Image src={searchSvg} alt="search" className="h-full lg:w-7 w-5" />
             <input
-              placeholder="Search people"
+              placeholder="Search Groups"
               type="text"
               className=" bg-[#F5F6F7] w-4/5 focus:outline-none h-full text-lg"
             />
@@ -306,7 +301,7 @@ export default function Groups() {
       </div>
 
       <div className="w-[70%] hidden lg:flex flex-col items-start">
-        {currentGroup && JSON.stringify(currentGroup) !== JSON.stringify({}) ? (
+        {currentGroup && JSON.stringify(currentGroup) !== JSON.stringify({admin:""}) ? (
 
           <>
             <div className="flex flex-row justify-start cursor-pointer h-[12%] border-b-2 border-[#F5F6F7] gap-4 items-center px-5" onClick={handleEditModal}>
