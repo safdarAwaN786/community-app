@@ -18,6 +18,8 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(cors({ origin: '*' }));
+
 
 // routers imports
 const userRoutes = require("./routes/userRoutes");
