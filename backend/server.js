@@ -12,12 +12,13 @@ require("dotenv").config();
 const app = express();
 require("./db/connection");
 app.use(cors({
-  origin: ['https://community-frontend-rho.vercel.app','http://localhost:3000',"*"], // Update to the front-end's URL
+  origin: ['https://community-app-client-lyart.vercel.app/','http://localhost:3000',"*"], // Update to the front-end's URL
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
 }));
 
 app.use(express.json());
+app.use(cors({ origin: '*' }));
 
 
 // routers imports
@@ -34,11 +35,7 @@ app.use(roomRoutes);
 const server = http.createServer(app);
 
 const io = socketIo(server, {
-  cors: {
-    origin: 'https://community-frontend-rho.vercel.app',
-    methods: ['GET', 'POST'],
-    credentials: true
-  }
+  cors: "*",
 });
 
 const authenticateToken = (token) => {
