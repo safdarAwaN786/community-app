@@ -18,7 +18,6 @@ app.use(cors({
 }));
 
 app.use(express.json());
-app.use(cors({ origin: '*' }));
 
 
 // routers imports
@@ -35,7 +34,11 @@ app.use(roomRoutes);
 const server = http.createServer(app);
 
 const io = socketIo(server, {
-  cors: "*",
+  cors: {
+    origin: 'https://community-frontend-rho.vercel.app',
+    methods: ['GET', 'POST'],
+    credentials: true
+  }
 });
 
 const authenticateToken = (token) => {
